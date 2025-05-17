@@ -5,46 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Wizualizacja Data Center – ArchiCAD + AutoCAD</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       background-color: #f0f0f0;
-      padding: 20px;
-      margin: 0; /* Dodano dla lepszego wyglądu */
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     h1 {
-      text-align: center; /* Wyśrodkowanie tytułu */
-      margin-bottom: 30px;
+      text-align: center;
+      padding: 20px;
+      background-color: #ddd;
+      margin: 0;
     }
-    #controls {
-      margin-bottom: 20px;
+    #main {
+      flex: 1;
+      display: flex;
+      height: calc(100vh - 80px);
+    }
+    #sidebar {
+      width: 280px;
       padding: 15px;
+      overflow-y: auto;
       background-color: #e9e9e9;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-right: 2px solid #ccc;
     }
-    #controls strong {
-      display: block; /* Każdy nagłówek sekcji w nowej linii */
+    #sidebar strong {
+      display: block;
+      margin-top: 15px;
       margin-bottom: 8px;
       font-size: 1.1em;
     }
-    #controls label {
-      display: block; /* Każda etykieta w nowej linii dla lepszej czytelności */
+    #sidebar label {
+      display: block;
       margin-bottom: 5px;
-      cursor: pointer; /* Lepszy UX */
+      cursor: pointer;
     }
-    #controls input[type="radio"] {
+    #sidebar input[type="radio"] {
       margin-right: 5px;
+    }
+    #content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+    }
+    #zoom-controls {
+      margin-bottom: 10px;
+    }
+    #zoom-controls button {
+      font-size: 16px;
+      padding: 8px 16px;
+      margin: 0 5px;
+      cursor: pointer;
     }
     #canvas {
       position: relative;
       width: 100%;
-      max-width: 1200px; /* Maksymalna szerokość płótna */
-      height: 800px;     /* Wysokość płótna */
+      max-width: 1200px;
+      height: 800px;
       border: 2px solid #ccc;
       background-color: #fff;
-      overflow: hidden;    /* Ukrywa części obrazów wychodzące poza płótno */
-      margin: 0 auto;      /* Wyśrodkowanie płótna na stronie */
+      overflow: hidden;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      cursor: grab;
     }
     .layer {
       position: absolute;
@@ -52,8 +82,9 @@
       left: 0;
       width: 100%;
       height: 100%;
-      display: none; /* Domyślnie wszystkie warstwy ukryte */
-      object-fit: contain; /* Dopasowuje obraz do kontenera zachowując proporcje */
+      display: none;
+      object-fit: contain;
+      transition: transform 0.2s ease;
     }
   </style>
 </head>
@@ -61,107 +92,156 @@
 
 <h1>Wizualizacja Data Center – warstwy ArchiCAD i AutoCAD</h1>
 
-<div id="controls">
-  <strong>ArchiCAD:</strong>
-  <label><input type="radio" name="archicadLayer" value="budynek" onchange="showOnlyLayer('budynek')"> Czysty budynek z podpisami</label>
-  <label><input type="radio" name="archicadLayer" value="maszyny" onchange="showOnlyLayer('maszyny')"> Budynek + maszyny + IT</label>
-  <label><input type="radio" name="archicadLayer" value="umeblowanie" onchange="showOnlyLayer('umeblowanie')"> Umeblowanie + parking + drzewa</label>
-  <label><input type="radio" name="archicadLayer" value="wyposazenie" onchange="showOnlyLayer('wyposazenie')"> Budynek + oświetlenie</label>
-  <label><input type="radio" name="archicadLayer" value="wszystko" onchange="showOnlyLayer('wszystko')"> Wszystko</label>
-  <br>
+<div id="main">
+  <div id="sidebar">
+    <strong>ArchiCAD:</strong>
+    <label><input type="radio" name="archicadLayer" value="budynek" onchange="showOnlyLayer('budynek')"> Rozmieszczenie pomieszczeń</label>
+    <label><input type="radio" name="archicadLayer" value="maszyny" onchange="showOnlyLayer('maszyny')"> Maszyny + IT</label>
+    <label><input type="radio" name="archicadLayer" value="umeblowanie" onchange="showOnlyLayer('umeblowanie')"> Strefa socjalna</label>
+    <label><input type="radio" name="archicadLayer" value="oswietlenie" onchange="showOnlyLayer('oswietlenie')"> Oświetlenie</label>
+    <label><input type="radio" name="archicadLayer" value="wyposazenie" onchange="showOnlyLayer('wyposazenie')"> Całkowite wyposażenie budynku</label>
 
-  <strong>AutoCAD:</strong>
-  <label><input type="radio" name="autocadLayer" value="torA" onchange="showOnlyAutoCAD('torA')"> Zasilanie – Tor A</label>
-  <label><input type="radio" name="autocadLayer" value="torB" onchange="showOnlyAutoCAD('torB')"> Zasilanie – Tor B</label>
-  <label><input type="radio" name="autocadLayer" value="trasy" onchange="showOnlyAutoCAD('trasy')"> Trasy kablowe</label>
-  <label><input type="radio" name="autocadLayer" value="hvacDach" onchange="showOnlyAutoCAD('hvacDach')"> HVAC-dach</label>
-  <label><input type="radio" name="autocadLayer" value="hvacPodloga" onchange="showOnlyAutoCAD('hvacPodloga')"> HVAC-podłoga</label>
-  <label><input type="radio" name="autocadLayer" value="hvacPrzestrzen" onchange="showOnlyAutoCAD('hvacPrzestrzen')"> HVAC-przestrzeń</label>
-  <label><input type="radio" name="autocadLayer" value="lanWan" onchange="showOnlyAutoCAD('lanWan')"> LAN i WAN</label>
-  <label><input type="radio" name="autocadLayer" value="sgg" onchange="showOnlyAutoCAD('sgg')"> SGG</label>
-  <label><input type="radio" name="autocadLayer" value="ssp" onchange="showOnlyAutoCAD('ssp')"> SSP</label>
-  <label><input type="radio" name="autocadLayer" value="sspSgg" onchange="showOnlyAutoCAD('sspSgg')"> SSP+SGG</label>
-</div>
+    <strong>AutoCAD:</strong>
+    <label><input type="radio" name="autocadLayer" value="torA" onchange="showOnlyAutoCAD('torA')"> Zasilanie – Tor A</label>
+    <label><input type="radio" name="autocadLayer" value="torB" onchange="showOnlyAutoCAD('torB')"> Zasilanie – Tor B</label>
+    <label><input type="radio" name="autocadLayer" value="trasy" onchange="showOnlyAutoCAD('trasy')"> Trasy kablowe</label>
+    <label><input type="radio" name="autocadLayer" value="hvacDach" onchange="showOnlyAutoCAD('hvacDach')"> HVAC-dach</label>
+    <label><input type="radio" name="autocadLayer" value="hvacPodloga" onchange="showOnlyAutoCAD('hvacPodloga')"> HVAC-podłoga</label>
+    <label><input type="radio" name="autocadLayer" value="hvacPrzestrzen" onchange="showOnlyAutoCAD('hvacPrzestrzen')"> HVAC-przestrzeń</label>
+    <label><input type="radio" name="autocadLayer" value="lanWan" onchange="showOnlyAutoCAD('lanWan')"> LAN i WAN</label>
+    <label><input type="radio" name="autocadLayer" value="sgg" onchange="showOnlyAutoCAD('sgg')"> SGG</label>
+    <label><input type="radio" name="autocadLayer" value="ssp" onchange="showOnlyAutoCAD('ssp')"> SSP</label>
+    <label><input type="radio" name="autocadLayer" value="sspSgg" onchange="showOnlyAutoCAD('sspSgg')"> SSP+SGG</label>
+  </div>
 
-<div id="canvas">
-  <!-- ArchiCAD warstwy -->
-  <img id="budynek" class="layer" src="svg/Budynek.svg" alt="Budynek">
-  <img id="maszyny" class="layer" src="svg/Maszyny i urządzenia.svg" alt="Maszyny i urządzenia">
-  <img id="umeblowanie" class="layer" src="svg/Umeblowanie cz. socjalna.svg" alt="Umeblowanie">
-  <img id="wyposazenie" class="layer" src="svg/Wyposażenie.svg" alt="Wyposażenie">
-  <img id="wszystko" class="layer" src="svg/Wszystko.svg" alt="Wszystko">
+  <div id="content">
+    <div id="zoom-controls">
+      <button onclick="zoomIn()">➕ Przybliż</button>
+      <button onclick="zoomOut()">➖ Oddal</button>
+      <button onclick="resetView()">🔄 Resetuj widok</button>
+    </div>
 
-  <!-- AutoCAD warstwy -->
-  <img id="torA" class="layer" src="svg/Zasilanie - Tor A.svg" alt="Tor A">
-  <img id="torB" class="layer" src="svg/Zasilanie - Tor B.svg" alt="Tor B">
-  <img id="trasy" class="layer" src="svg/Trasy kablowe.svg" alt="Trasy kablowe">
-  <img id="hvacDach" class="layer" src="svg/HVAC-dach.svg" alt="HVAC-dach">
-  <img id="hvacPodloga" class="layer" src="svg/HVAC-podloga.svg" alt="HVAC-podłoga">
-  <img id="hvacPrzestrzen" class="layer" src="svg/HVAC-przestrzen.svg" alt="HVAC-przestrzeń">
-  <img id="lanWan" class="layer" src="svg/LAN i WAN.svg" alt="LAN i WAN">
-  <img id="sgg" class="layer" src="svg/SGG.svg" alt="SGG">
-  <img id="ssp" class="layer" src="svg/SSP.svg" alt="SSP">
-  <img id="sspSgg" class="layer" src="svg/SSP+SGG.svg" alt="SSP+SGG">
+    <div id="canvas">
+      <!-- SVG warstwy -->
+      <img id="budynek" class="layer" src="svg/Budynek.svg" alt="Budynek">
+      <img id="maszyny" class="layer" src="svg/Maszyny i urządzenia.svg" alt="Maszyny">
+      <img id="umeblowanie" class="layer" src="svg/Umeblowanie cz. socjalna.svg" alt="Umeblowanie">
+      <img id="wyposazenie" class="layer" src="svg/Wyposażenie.svg" alt="Wyposażenie">
+      <img id="oswietlenie" class="layer" src="svg/Oswietlenie.svg" alt="Oswietlenie">
+      <img id="torA" class="layer" src="svg/Zasilanie - Tor A.svg" alt="Tor A">
+      <img id="torB" class="layer" src="svg/Zasilanie - Tor B.svg" alt="Tor B">
+      <img id="trasy" class="layer" src="svg/Trasy kablowe.svg" alt="Trasy">
+      <img id="hvacDach" class="layer" src="svg/HVAC-dach.svg" alt="HVAC dach">
+      <img id="hvacPodloga" class="layer" src="svg/HVAC-podloga.svg" alt="HVAC podłoga">
+      <img id="hvacPrzestrzen" class="layer" src="svg/HVAC-przestrzen.svg" alt="HVAC przestrzeń">
+      <img id="lanWan" class="layer" src="svg/LAN i WAN.svg" alt="LAN WAN">
+      <img id="sgg" class="layer" src="svg/SGG.svg" alt="SGG">
+      <img id="ssp" class="layer" src="svg/SSP.svg" alt="SSP">
+      <img id="sspSgg" class="layer" src="svg/SSP+SGG.svg" alt="SSP+SGG">
+    </div>
+  </div>
 </div>
 
 <script>
-  const archicadLayerIds = ['budynek', 'maszyny', 'umeblowanie', 'wyposazenie', 'wszystko'];
+  const archicadLayerIds = ['budynek', 'maszyny', 'umeblowanie', 'wyposazenie', 'oswietlenie'];
   const autocadLayerIds = ['torA', 'torB', 'trasy', 'hvacDach', 'hvacPodloga', 'hvacPrzestrzen', 'lanWan', 'sgg', 'ssp', 'sspSgg'];
+  let currentScale = 1.0;
+  let offsetX = 0;
+  let offsetY = 0;
+  let isDragging = false;
+  let dragStartX, dragStartY;
 
-  function showOnlyLayer(idToShow) {
-    // Pokaż wybraną warstwę ArchiCAD, ukryj pozostałe ArchiCAD
+  function setTransform(el) {
+    el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${currentScale})`;
+    el.style.transformOrigin = 'center center';
+  }
+
+  function zoomIn() {
+    currentScale = Math.min(currentScale + 0.1, 3.0);
+    updateTransform();
+  }
+
+  function zoomOut() {
+    currentScale = Math.max(currentScale - 0.1, 0.5);
+    updateTransform();
+  }
+
+  function resetView() {
+    currentScale = 1.0;
+    offsetX = 0;
+    offsetY = 0;
+    updateTransform();
+  }
+
+  function updateTransform() {
+    document.querySelectorAll('.layer').forEach(el => {
+      if (el.style.display === 'block') {
+        setTransform(el);
+      }
+    });
+  }
+
+  function showOnlyLayer(id) {
     archicadLayerIds.forEach(layerId => {
       const el = document.getElementById(layerId);
       if (el) {
-        el.style.display = (layerId === idToShow) ? 'block' : 'none';
+        el.style.display = (layerId === id) ? 'block' : 'none';
+        if (layerId === id) setTransform(el);
       }
     });
+    autocadLayerIds.forEach(id => document.getElementById(id).style.display = 'none');
+    document.querySelectorAll('input[name="autocadLayer"]').forEach(r => r.checked = false);
+  }
 
-    // Ukryj wszystkie warstwy AutoCAD
+  function showOnlyAutoCAD(id) {
     autocadLayerIds.forEach(layerId => {
       const el = document.getElementById(layerId);
       if (el) {
-        el.style.display = 'none';
+        el.style.display = (layerId === id) ? 'block' : 'none';
+        if (layerId === id) setTransform(el);
       }
     });
-    // Odznacz wszystkie radio buttony AutoCAD
-    document.querySelectorAll('input[name="autocadLayer"]').forEach(radio => radio.checked = false);
+    archicadLayerIds.forEach(id => document.getElementById(id).style.display = 'none');
+    document.querySelectorAll('input[name="archicadLayer"]').forEach(r => r.checked = false);
   }
 
-  function showOnlyAutoCAD(idToShow) {
-    // Pokaż wybraną warstwę AutoCAD, ukryj pozostałe AutoCAD
-    autocadLayerIds.forEach(layerId => {
-      const el = document.getElementById(layerId);
-      if (el) {
-        el.style.display = (layerId === idToShow) ? 'block' : 'none';
-      }
-    });
+  const canvas = document.getElementById('canvas');
 
-    // Ukryj wszystkie warstwy ArchiCAD
-    archicadLayerIds.forEach(layerId => {
-      const el = document.getElementById(layerId);
-      if (el) {
-        el.style.display = 'none';
-      }
-    });
-    // Odznacz wszystkie radio buttony ArchiCAD
-    document.querySelectorAll('input[name="archicadLayer"]').forEach(radio => radio.checked = false);
-  }
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (e.deltaY < 0) zoomIn(); else zoomOut();
+  });
 
-  // Ustawienie stanu początkowego po załadowaniu DOM
+  canvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    dragStartX = e.clientX - offsetX;
+    dragStartY = e.clientY - offsetY;
+    canvas.style.cursor = 'grabbing';
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    if (isDragging) {
+      offsetX = e.clientX - dragStartX;
+      offsetY = e.clientY - dragStartY;
+      updateTransform();
+    }
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    isDragging = false;
+    canvas.style.cursor = 'grab';
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    isDragging = false;
+    canvas.style.cursor = 'grab';
+  });
+
   document.addEventListener('DOMContentLoaded', () => {
-    const firstArchicadRadio = document.querySelector('input[name="archicadLayer"]');
-    if (firstArchicadRadio) {
-      firstArchicadRadio.checked = true;
-      showOnlyLayer(firstArchicadRadio.value);
-    } else {
-      // Awaryjnie, jeśli nie ma żadnego radio buttona ArchiCAD,
-      // spróbuj zaznaczyć pierwszy AutoCAD
-      const firstAutoCADRadio = document.querySelector('input[name="autocadLayer"]');
-      if (firstAutoCADRadio) {
-        firstAutoCADRadio.checked = true;
-        showOnlyAutoCAD(firstAutoCADRadio.value);
-      }
+    const firstRadio = document.querySelector('input[name="archicadLayer"]');
+    if (firstRadio) {
+      firstRadio.checked = true;
+      showOnlyLayer(firstRadio.value);
     }
   });
 </script>
