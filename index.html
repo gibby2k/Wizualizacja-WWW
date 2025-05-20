@@ -3,24 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wizualizacja Data Center – ArchiCAD + AutoCAD</title>
+  <title>Wizualizacja Data Center – PNG warstwy</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background-color: #f0f0f0;
-      height: 100vh;
       display: flex;
       flex-direction: column;
+      height: 100vh;
     }
     h1 {
-      text-align: center;
-      padding: 20px;
-      background-color: #ddd;
+      background: #ddd;
       margin: 0;
+      padding: 20px;
+      text-align: center;
     }
     #main {
       flex: 1;
@@ -28,25 +25,15 @@
       height: calc(100vh - 80px);
     }
     #sidebar {
-      width: 280px;
+      width: 260px;
+      background: #e9e9e9;
       padding: 15px;
-      overflow-y: auto;
-      background-color: #e9e9e9;
       border-right: 2px solid #ccc;
-    }
-    #sidebar strong {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 8px;
-      font-size: 1.1em;
     }
     #sidebar label {
       display: block;
-      margin-bottom: 5px;
+      margin-bottom: 10px;
       cursor: pointer;
-    }
-    #sidebar input[type="radio"] {
-      margin-right: 5px;
     }
     #content {
       flex: 1;
@@ -56,22 +43,13 @@
       justify-content: flex-start;
       padding: 20px;
     }
-    #zoom-controls {
-      margin-bottom: 10px;
-    }
-    #zoom-controls button {
-      font-size: 16px;
-      padding: 8px 16px;
-      margin: 0 5px;
-      cursor: pointer;
-    }
     #canvas {
       position: relative;
       width: 100%;
       max-width: 1200px;
       height: 800px;
+      background: #fff;
       border: 2px solid #ccc;
-      background-color: #fff;
       overflow: hidden;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       cursor: grab;
@@ -82,134 +60,61 @@
       left: 0;
       width: 100%;
       height: 100%;
-      display: none;
       object-fit: contain;
+      display: none;
+      transform-origin: center center;
       transition: transform 0.2s ease;
     }
   </style>
 </head>
 <body>
 
-<h1>Wizualizacja Data Center – warstwy ArchiCAD i AutoCAD</h1>
+<h1>Wizualizacja Data Center – PNG warstwy</h1>
 
 <div id="main">
   <div id="sidebar">
-    <strong>ArchiCAD:</strong>
-    <label><input type="radio" name="archicadLayer" value="budynek" onchange="showOnlyLayer('budynek')"> Rozmieszczenie pomieszczeń</label>
-    <label><input type="radio" name="archicadLayer" value="maszyny" onchange="showOnlyLayer('maszyny')"> Maszyny + IT</label>
-    <label><input type="radio" name="archicadLayer" value="umeblowanie" onchange="showOnlyLayer('umeblowanie')"> Strefa socjalna</label>
-    <label><input type="radio" name="archicadLayer" value="oswietlenie" onchange="showOnlyLayer('oswietlenie')"> Oświetlenie</label>
-    <label><input type="radio" name="archicadLayer" value="wyposazenie" onchange="showOnlyLayer('wyposazenie')"> Całkowite wyposażenie budynku</label>
-
-    <strong>AutoCAD:</strong>
-    <label><input type="radio" name="autocadLayer" value="torA" onchange="showOnlyAutoCAD('torA')"> Zasilanie – Tor A</label>
-    <label><input type="radio" name="autocadLayer" value="torB" onchange="showOnlyAutoCAD('torB')"> Zasilanie – Tor B</label>
-    <label><input type="radio" name="autocadLayer" value="trasy" onchange="showOnlyAutoCAD('trasy')"> Trasy kablowe</label>
-    <label><input type="radio" name="autocadLayer" value="hvacDach" onchange="showOnlyAutoCAD('hvacDach')"> HVAC-dach</label>
-    <label><input type="radio" name="autocadLayer" value="hvacPodloga" onchange="showOnlyAutoCAD('hvacPodloga')"> HVAC-podłoga</label>
-    <label><input type="radio" name="autocadLayer" value="hvacPrzestrzen" onchange="showOnlyAutoCAD('hvacPrzestrzen')"> HVAC-przestrzeń</label>
-    <label><input type="radio" name="autocadLayer" value="lanWan" onchange="showOnlyAutoCAD('lanWan')"> LAN i WAN</label>
-    <label><input type="radio" name="autocadLayer" value="sgg" onchange="showOnlyAutoCAD('sgg')"> SGG</label>
-    <label><input type="radio" name="autocadLayer" value="ssp" onchange="showOnlyAutoCAD('ssp')"> SSP</label>
-    <label><input type="radio" name="autocadLayer" value="sspSgg" onchange="showOnlyAutoCAD('sspSgg')"> SSP+SGG</label>
+    <strong>Włącz/wyłącz warstwy:</strong>
+    <label><input type="checkbox" value="budynek" onchange="toggleLayer(this)"> Budynek</label>
+    <label><input type="checkbox" value="trasy" onchange="toggleLayer(this)"> Trasy koryt kablowych</label>
+    <label><input type="checkbox" value="ssp" onchange="toggleLayer(this)"> SSP</label>
+    <label><input type="checkbox" value="zasilanie" onchange="toggleLayer(this)"> Zasilanie</label>
   </div>
 
   <div id="content">
-    <div id="zoom-controls">
-      <button onclick="zoomIn()">➕ Przybliż</button>
-      <button onclick="zoomOut()">➖ Oddal</button>
-      <button onclick="resetView()">🔄 Resetuj widok</button>
-    </div>
-
     <div id="canvas">
-      <!-- SVG warstwy -->
-      <img id="budynek" class="layer" src="svg/Budynek.svg" alt="Budynek">
-      <img id="maszyny" class="layer" src="svg/Maszyny i urzadzenia.svg" alt="Maszyny">
-      <img id="umeblowanie" class="layer" src="svg/Umeblowanie cz. socjalna.svg" alt="Umeblowanie">
-      <img id="wyposazenie" class="layer" src="svg/Wyposazenie.svg" alt="Wyposażenie">
-      <img id="oswietlenie" class="layer" src="svg/Oswietlenie.svg" alt="Oswietlenie">
-      <img id="torA" class="layer" src="svg/Zasilanie - Tor A.svg" alt="Tor A">
-      <img id="torB" class="layer" src="svg/Zasilanie - Tor B.svg" alt="Tor B">
-      <img id="trasy" class="layer" src="svg/Trasy kablowe.svg" alt="Trasy">
-      <img id="hvacDach" class="layer" src="svg/HVAC-dach.svg" alt="HVAC dach">
-      <img id="hvacPodloga" class="layer" src="svg/HVAC-podloga.svg" alt="HVAC podłoga">
-      <img id="hvacPrzestrzen" class="layer" src="svg/HVAC-przestrzen.svg" alt="HVAC przestrzeń">
-      <img id="lanWan" class="layer" src="svg/LAN i WAN.svg" alt="LAN WAN">
-      <img id="sgg" class="layer" src="svg/SGG.svg" alt="SGG">
-      <img id="ssp" class="layer" src="svg/SSP.svg" alt="SSP">
-      <img id="sspSgg" class="layer" src="svg/SSP+SGG.svg" alt="SSP+SGG">
+      <img id="budynek" class="layer" src="PNG/Budynek.png" alt="Budynek">
+      <img id="trasy" class="layer" src="PNG/Trasy koryt kablowych.png" alt="Trasy">
+      <img id="ssp" class="layer" src="PNG/SSP.png" alt="SSP">
+      <img id="zasilanie" class="layer" src="PNG/Zasilanie.png" alt="Zasilanie">
     </div>
   </div>
 </div>
 
 <script>
-  const archicadLayerIds = ['budynek', 'maszyny', 'umeblowanie', 'wyposazenie', 'oswietlenie'];
-  const autocadLayerIds = ['torA', 'torB', 'trasy', 'hvacDach', 'hvacPodloga', 'hvacPrzestrzen', 'lanWan', 'sgg', 'ssp', 'sspSgg'];
+  const canvas = document.getElementById('canvas');
   let currentScale = 1.0;
-  let offsetX = 0;
-  let offsetY = 0;
-  let isDragging = false;
-  let dragStartX, dragStartY;
+  let offsetX = 0, offsetY = 0;
+  let isDragging = false, dragStartX, dragStartY;
 
   function setTransform(el) {
     el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${currentScale})`;
-    el.style.transformOrigin = 'center center';
   }
 
-  function zoomIn() {
-    currentScale = Math.min(currentScale + 0.1, 3.0);
-    updateTransform();
+  function toggleLayer(checkbox) {
+    const el = document.getElementById(checkbox.value);
+    if (el) {
+      el.style.display = checkbox.checked ? 'block' : 'none';
+      if (checkbox.checked) setTransform(el);
+    }
   }
-
-  function zoomOut() {
-    currentScale = Math.max(currentScale - 0.1, 0.5);
-    updateTransform();
-  }
-
-  function resetView() {
-    currentScale = 1.0;
-    offsetX = 0;
-    offsetY = 0;
-    updateTransform();
-  }
-
-  function updateTransform() {
-    document.querySelectorAll('.layer').forEach(el => {
-      if (el.style.display === 'block') {
-        setTransform(el);
-      }
-    });
-  }
-
-  function showOnlyLayer(id) {
-    archicadLayerIds.forEach(layerId => {
-      const el = document.getElementById(layerId);
-      if (el) {
-        el.style.display = (layerId === id) ? 'block' : 'none';
-        if (layerId === id) setTransform(el);
-      }
-    });
-    autocadLayerIds.forEach(id => document.getElementById(id).style.display = 'none');
-    document.querySelectorAll('input[name="autocadLayer"]').forEach(r => r.checked = false);
-  }
-
-  function showOnlyAutoCAD(id) {
-    autocadLayerIds.forEach(layerId => {
-      const el = document.getElementById(layerId);
-      if (el) {
-        el.style.display = (layerId === id) ? 'block' : 'none';
-        if (layerId === id) setTransform(el);
-      }
-    });
-    archicadLayerIds.forEach(id => document.getElementById(id).style.display = 'none');
-    document.querySelectorAll('input[name="archicadLayer"]').forEach(r => r.checked = false);
-  }
-
-  const canvas = document.getElementById('canvas');
 
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
-    if (e.deltaY < 0) zoomIn(); else zoomOut();
+    currentScale += e.deltaY < 0 ? 0.1 : -0.1;
+    currentScale = Math.max(0.5, Math.min(currentScale, 3));
+    document.querySelectorAll('.layer').forEach(el => {
+      if (el.style.display === 'block') setTransform(el);
+    });
   });
 
   canvas.addEventListener('mousedown', e => {
@@ -223,7 +128,9 @@
     if (isDragging) {
       offsetX = e.clientX - dragStartX;
       offsetY = e.clientY - dragStartY;
-      updateTransform();
+      document.querySelectorAll('.layer').forEach(el => {
+        if (el.style.display === 'block') setTransform(el);
+      });
     }
   });
 
@@ -235,14 +142,6 @@
   canvas.addEventListener('mouseleave', () => {
     isDragging = false;
     canvas.style.cursor = 'grab';
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const firstRadio = document.querySelector('input[name="archicadLayer"]');
-    if (firstRadio) {
-      firstRadio.checked = true;
-      showOnlyLayer(firstRadio.value);
-    }
   });
 </script>
 
