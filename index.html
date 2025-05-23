@@ -113,8 +113,9 @@
   let isDragging = false, dragStartX, dragStartY;
 
   function setTransform(el) {
-    el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${currentScale})`;
-  }
+  el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${currentScale}) rotate(90deg)`;
+}
+
 
   function toggleLayer(checkbox) {
     const el = document.getElementById(checkbox.value);
