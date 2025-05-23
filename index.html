@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wizualizacja WWW Data Center Igor Gabrych</title>
+  <title>Wizualizacja Data Center – PNG warstwy</title>
   <style>
     body {
       margin: 0;
@@ -45,8 +45,9 @@
     }
     #canvas {
       position: relative;
-      width: 800px;
-      height: 1200px;
+      width: 100%;
+      max-width: 1200px;
+      height: 800px;
       background: #fff;
       border: 2px solid #ccc;
       overflow: hidden;
@@ -68,7 +69,7 @@
 </head>
 <body>
 
-<h1>Wizualizacja Data Center - projekty AutoCAD</h1>
+<h1>Wizualizacja Data Center – PNG warstwy</h1>
 
 <div id="main">
   <div id="sidebar">
@@ -112,21 +113,16 @@
   let isDragging = false, dragStartX, dragStartY;
 
   function setTransform(el) {
-  el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${currentScale}) rotate(-90deg)`;
-}
-
-
+    el.style.transform = translate(${offsetX}px, ${offsetY}px) scale(${currentScale});
+  }
 
   function toggleLayer(checkbox) {
-  const el = document.getElementById(checkbox.value);
-  if (el) {
-    el.style.display = checkbox.checked ? 'block' : 'none';
-    if (checkbox.checked) {
-      adjustCanvasSize(el);
+    const el = document.getElementById(checkbox.value);
+    if (el) {
+      el.style.display = checkbox.checked ? 'block' : 'none';
+      if (checkbox.checked) setTransform(el);
     }
   }
-}
-
 
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
@@ -163,30 +159,6 @@
     isDragging = false;
     canvas.style.cursor = 'grab';
   });
-
-  document.querySelectorAll('.layer').forEach(img => {
-  img.addEventListener('load', () => {
-    if (img.style.display === 'block') {
-      adjustCanvasSize(img);
-    }
-  });
-});
-
-function adjustCanvasSize(img) {
-  const rotatedWidth = img.naturalHeight;
-  const rotatedHeight = img.naturalWidth;
-  const canvas = document.getElementById('canvas');
-
-  canvas.style.width = rotatedWidth + 'px';
-  canvas.style.height = rotatedHeight + 'px';
-
-  offsetX = 0;
-  offsetY = 0;
-  currentScale = 1.0;
-
-  setTransform(img);
-}
-
 </script>
 
 </body>
