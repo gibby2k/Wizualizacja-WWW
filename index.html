@@ -64,6 +64,26 @@
       transform-origin: center center;
       transition: transform 0.2s ease;
     }
+
+    #legend {
+  width: 300px;
+  background: #f9f9f9;
+  padding: 10px;
+  overflow-y: auto;
+  border-left: 2px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  }
+  
+  #legend img {
+    width: 100%;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+
+    
   </style>
 </head>
 <body>
@@ -105,6 +125,14 @@
   </div>
 </div>
 
+<div id="legend">
+  <img src="Legenda-Zasilanie.png" alt="Legenda PWR" />
+  <img src="Legenda-LAN-i-WAN.png" alt="Legenda LAN i WAN" />
+  <img src="Legenda-SGG.png" alt="Legenda SGG" />
+  <img src="Legenda-SSP.png" alt="Legenda SSP" />
+</div>
+
+  
 <script>
   const canvas = document.getElementById('canvas');
   let currentScale = 1.0;
