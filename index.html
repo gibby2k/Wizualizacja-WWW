@@ -135,13 +135,76 @@
 
   <!-- Legenda -->
   <div id="legend">
-    <img src="PNG/Legenda-Zasilanie.png" alt="Legenda Zasilanie" />
-    <img src="PNG/Legenda-LAN-i-WAN.png" alt="Legenda LAN i WAN" />
-    <img src="PNG/Legenda-SGG.png" alt="Legenda SGG" />
-    <img src="PNG/Legenda-SSP.png" alt="Legenda SSP" />
-    <img src="PNG/Legenda-HVAC.png" alt="Legenda HVAC" />
+    <div class="legend-section">
+      <h3 onclick="toggleLegend(this)">Legenda Zasilanie ▼</h3>
+      <div class="legend-content">
+        <img src="PNG/Legenda-Zasilanie.png" alt="Legenda Zasilanie" />
+      </div>
+    </div>
+    <div class="legend-section">
+      <h3 onclick="toggleLegend(this)">Legenda LAN i WAN ▼</h3>
+      <div class="legend-content">
+        <img src="PNG/Legenda-LAN-i-WAN.png" alt="Legenda LAN i WAN" />
+      </div>
+    </div>
+    <div class="legend-section">
+      <h3 onclick="toggleLegend(this)">Legenda SGG ▼</h3>
+      <div class="legend-content">
+        <img src="PNG/Legenda-SGG.png" alt="Legenda SGG" />
+      </div>
+    </div>
+    <div class="legend-section">
+      <h3 onclick="toggleLegend(this)">Legenda SSP ▼</h3>
+      <div class="legend-content">
+        <img src="PNG/Legenda-SSP.png" alt="Legenda SSP" />
+      </div>
+    </div>
+    <div class="legend-section">
+      <h3 onclick="toggleLegend(this)">Legenda HVAC ▼</h3>
+      <div class="legend-content">
+        <img src="PNG/Legenda-HVAC.png" alt="Legenda HVAC" />
+      </div>
+    </div>
   </div>
 </div>
+
+<style>
+  .legend-section {
+    width: 100%;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+
+  .legend-section h3 {
+    margin: 0;
+    padding: 8px;
+    background: #ddd;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .legend-content {
+    display: none;
+    padding: 8px;
+  }
+
+  .legend-content img {
+    width: 100%;
+    border: 1px solid #ccc;
+  }
+</style>
+
+<script>
+  // toggle legend visibility
+  function toggleLegend(header) {
+    const content = header.nextElementSibling;
+    const isVisible = content.style.display === "block";
+    content.style.display = isVisible ? "none" : "block";
+    header.innerText = header.innerText.replace(isVisible ? "▲" : "▼", isVisible ? "▼" : "▲");
+  }
+</script>
 
 <script>
   const canvas = document.getElementById('canvas');
