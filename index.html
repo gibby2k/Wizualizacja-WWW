@@ -85,11 +85,30 @@
       align-items: center;
     }
 
-    #legend img {
+    .legend-section {
       width: 100%;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       border: 1px solid #ccc;
       background: #fff;
+    }
+
+    .legend-section h3 {
+      margin: 0;
+      padding: 8px;
+      background: #ddd;
+      font-size: 16px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .legend-content {
+      display: none;
+      padding: 8px;
+    }
+
+    .legend-content img {
+      width: 100%;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
@@ -98,7 +117,6 @@
 <h1>Wizualizacja Data Center - projekty AutoCAD</h1>
 
 <div id="main">
-  <!-- Sidebar -->
   <div id="sidebar">
     <strong>Włącz/wyłącz warstwy:</strong>
     <label><input type="checkbox" value="Budynek" onchange="toggleLayer(this)"> Budynek</label>
@@ -115,7 +133,6 @@
     <label><input type="checkbox" value="Zasilanie Tor B" onchange="toggleLayer(this)"> Zasilanie Tor B</label>
   </div>
 
-  <!-- Główna zawartość -->
   <div id="content">
     <div id="canvas">
       <img id="Budynek" class="layer" src="PNG/Budynek.png" alt="Budynek">
@@ -133,84 +150,59 @@
     </div>
   </div>
 
-  <!-- Legenda -->
   <div id="legend">
     <div class="legend-section">
-      <h3 onclick="toggleLegend(this)">Legenda Zasilanie ▼</h3>
-      <div class="legend-content">
+      <h3 data-legend="Legenda-Zasilanie" onclick="toggleLegend(this)">Legenda Zasilanie ▼</h3>
+      <div id="Legenda-Zasilanie" class="legend-content">
         <img src="PNG/Legenda-Zasilanie.png" alt="Legenda Zasilanie" />
       </div>
     </div>
     <div class="legend-section">
-      <h3 onclick="toggleLegend(this)">Legenda LAN i WAN ▼</h3>
-      <div class="legend-content">
+      <h3 data-legend="Legenda-LAN-WAN" onclick="toggleLegend(this)">Legenda LAN i WAN ▼</h3>
+      <div id="Legenda-LAN-WAN" class="legend-content">
         <img src="PNG/Legenda-LAN-i-WAN.png" alt="Legenda LAN i WAN" />
       </div>
     </div>
     <div class="legend-section">
-      <h3 onclick="toggleLegend(this)">Legenda SGG ▼</h3>
-      <div class="legend-content">
+      <h3 data-legend="Legenda-SGG" onclick="toggleLegend(this)">Legenda SGG ▼</h3>
+      <div id="Legenda-SGG" class="legend-content">
         <img src="PNG/Legenda-SGG.png" alt="Legenda SGG" />
       </div>
     </div>
     <div class="legend-section">
-      <h3 onclick="toggleLegend(this)">Legenda SSP ▼</h3>
-      <div class="legend-content">
+      <h3 data-legend="Legenda-SSP" onclick="toggleLegend(this)">Legenda SSP ▼</h3>
+      <div id="Legenda-SSP" class="legend-content">
         <img src="PNG/Legenda-SSP.png" alt="Legenda SSP" />
       </div>
     </div>
     <div class="legend-section">
-      <h3 onclick="toggleLegend(this)">Legenda HVAC ▼</h3>
-      <div class="legend-content">
+      <h3 data-legend="Legenda-HVAC" onclick="toggleLegend(this)">Legenda HVAC ▼</h3>
+      <div id="Legenda-HVAC" class="legend-content">
         <img src="PNG/Legenda-HVAC.png" alt="Legenda HVAC" />
       </div>
     </div>
   </div>
 </div>
 
-<style>
-  .legend-section {
-    width: 100%;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    background: #fff;
-  }
-
-  .legend-section h3 {
-    margin: 0;
-    padding: 8px;
-    background: #ddd;
-    font-size: 16px;
-    cursor: pointer;
-    text-align: center;
-  }
-
-  .legend-content {
-    display: none;
-    padding: 8px;
-  }
-
-  .legend-content img {
-    width: 100%;
-    border: 1px solid #ccc;
-  }
-</style>
-
-<script>
-  // toggle legend visibility
-  function toggleLegend(header) {
-    const content = header.nextElementSibling;
-    const isVisible = content.style.display === "block";
-    content.style.display = isVisible ? "none" : "block";
-    header.innerText = header.innerText.replace(isVisible ? "▲" : "▼", isVisible ? "▼" : "▲");
-  }
-</script>
-
 <script>
   const canvas = document.getElementById('canvas');
   let currentScale = 1.0;
   let offsetX = 0, offsetY = 0;
   let isDragging = false, dragStartX, dragStartY;
+
+  const layerLegendMap = {
+    "HVAC - ciepłe kanały": "Legenda-HVAC",
+    "HVAC - dach": "Legenda-HVAC",
+    "HVAC - zimne kanały": "Legenda-HVAC",
+    "LAN": "Legenda-LAN-WAN",
+    "SGG": "Legenda-SGG",
+    "SSP": "Legenda-SSP",
+    "Vesda": "Legenda-SSP",
+    "WAN": "Legenda-LAN-WAN",
+    "Trasy koryt kablowych": "Legenda-Zasilanie",
+    "Zasilanie Tor A": "Legenda-Zasilanie",
+    "Zasilanie Tor B": "Legenda-Zasilanie"
+  };
 
   function setTransform(el) {
     el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${currentScale}) rotate(-90deg)`;
@@ -222,8 +214,32 @@
       el.style.display = checkbox.checked ? 'block' : 'none';
       if (checkbox.checked) {
         adjustCanvasSize(el);
+        openLegendByLayer(checkbox.value);
       }
     }
+  }
+
+  function openLegendByLayer(layerName) {
+    const legendId = layerLegendMap[layerName];
+    if (legendId) {
+      const content = document.getElementById(legendId);
+      if (content && content.style.display !== "block") {
+        content.style.display = "block";
+        const header = document.querySelector(`h3[data-legend="${legendId}"]`);
+        if (header) {
+          header.innerText = header.innerText.replace("▼", "▲");
+          header.classList.add("open");
+        }
+      }
+    }
+  }
+
+  function toggleLegend(header) {
+    const content = document.getElementById(header.dataset.legend);
+    const isVisible = content.style.display === "block";
+    content.style.display = isVisible ? "none" : "block";
+    header.innerText = header.innerText.replace(isVisible ? "▲" : "▼", isVisible ? "▼" : "▲");
+    header.classList.toggle('open', !isVisible);
   }
 
   canvas.addEventListener('wheel', e => {
