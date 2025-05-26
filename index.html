@@ -13,28 +13,34 @@
       flex-direction: column;
       height: 100vh;
     }
+
     h1 {
       background: #ddd;
       margin: 0;
       padding: 20px;
       text-align: center;
     }
+
     #main {
       flex: 1;
       display: flex;
       height: calc(100vh - 80px);
     }
+
     #sidebar {
       width: 260px;
       background: #e9e9e9;
       padding: 15px;
       border-right: 2px solid #ccc;
+      overflow-y: auto;
     }
+
     #sidebar label {
       display: block;
       margin-bottom: 10px;
       cursor: pointer;
     }
+
     #content {
       flex: 1;
       display: flex;
@@ -42,7 +48,9 @@
       align-items: center;
       justify-content: flex-start;
       padding: 20px;
+      overflow: auto;
     }
+
     #canvas {
       position: relative;
       width: 800px;
@@ -53,6 +61,7 @@
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       cursor: grab;
     }
+
     .layer {
       position: absolute;
       top: 0;
@@ -66,24 +75,22 @@
     }
 
     #legend {
-  width: 300px;
-  background: #f9f9f9;
-  padding: 10px;
-  overflow-y: auto;
-  border-left: 2px solid #ccc;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  }
-  
-  #legend img {
-    width: 100%;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    background: #fff;
-  }
+      width: 300px;
+      background: #f9f9f9;
+      padding: 10px;
+      overflow-y: auto;
+      border-left: 2px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-    
+    #legend img {
+      width: 100%;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      background: #fff;
+    }
   </style>
 </head>
 <body>
@@ -91,6 +98,7 @@
 <h1>Wizualizacja Data Center - projekty AutoCAD</h1>
 
 <div id="main">
+  <!-- Sidebar -->
   <div id="sidebar">
     <strong>Włącz/wyłącz warstwy:</strong>
     <label><input type="checkbox" value="Budynek" onchange="toggleLayer(this)"> Budynek</label>
@@ -107,6 +115,7 @@
     <label><input type="checkbox" value="Zasilanie Tor B" onchange="toggleLayer(this)"> Zasilanie Tor B</label>
   </div>
 
+  <!-- Główna zawartość -->
   <div id="content">
     <div id="canvas">
       <img id="Budynek" class="layer" src="PNG/Budynek.png" alt="Budynek">
@@ -123,16 +132,16 @@
       <img id="Zasilanie Tor B" class="layer" src="PNG/Zasilanie Tor B.png" alt="Zasilanie Tor B">
     </div>
   </div>
+
+  <!-- Legenda -->
+  <div id="legend">
+    <img src="PNG/Legenda-Zasilanie.png" alt="Legenda PWR" />
+    <img src="PNG/Legenda-LAN-i-WAN.png" alt="Legenda LAN i WAN" />
+    <img src="PNG/Legenda-SGG.png" alt="Legenda SGG" />
+    <img src="PNG/Legenda-SSP.png" alt="Legenda SSP" />
+  </div>
 </div>
 
-<div id="legend">
-  <img src="Legenda-Zasilanie.png" alt="Legenda PWR" />
-  <img src="Legenda-LAN-i-WAN.png" alt="Legenda LAN i WAN" />
-  <img src="Legenda-SGG.png" alt="Legenda SGG" />
-  <img src="Legenda-SSP.png" alt="Legenda SSP" />
-</div>
-
-  
 <script>
   const canvas = document.getElementById('canvas');
   let currentScale = 1.0;
@@ -140,21 +149,18 @@
   let isDragging = false, dragStartX, dragStartY;
 
   function setTransform(el) {
-  el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${currentScale}) rotate(-90deg)`;
-}
-
-
+    el.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${currentScale}) rotate(-90deg)`;
+  }
 
   function toggleLayer(checkbox) {
-  const el = document.getElementById(checkbox.value);
-  if (el) {
-    el.style.display = checkbox.checked ? 'block' : 'none';
-    if (checkbox.checked) {
-      adjustCanvasSize(el);
+    const el = document.getElementById(checkbox.value);
+    if (el) {
+      el.style.display = checkbox.checked ? 'block' : 'none';
+      if (checkbox.checked) {
+        adjustCanvasSize(el);
+      }
     }
   }
-}
-
 
   canvas.addEventListener('wheel', e => {
     e.preventDefault();
@@ -193,28 +199,23 @@
   });
 
   document.querySelectorAll('.layer').forEach(img => {
-  img.addEventListener('load', () => {
-    if (img.style.display === 'block') {
-      adjustCanvasSize(img);
-    }
+    img.addEventListener('load', () => {
+      if (img.style.display === 'block') {
+        adjustCanvasSize(img);
+      }
+    });
   });
-});
 
-function adjustCanvasSize(img) {
-  const rotatedWidth = img.naturalHeight;
-  const rotatedHeight = img.naturalWidth;
-  const canvas = document.getElementById('canvas');
-
-  canvas.style.width = rotatedWidth + 'px';
-  canvas.style.height = rotatedHeight + 'px';
-
-  offsetX = 0;
-  offsetY = 0;
-  currentScale = 1.0;
-
-  setTransform(img);
-}
-
+  function adjustCanvasSize(img) {
+    const rotatedWidth = img.naturalHeight;
+    const rotatedHeight = img.naturalWidth;
+    canvas.style.width = rotatedWidth + 'px';
+    canvas.style.height = rotatedHeight + 'px';
+    offsetX = 0;
+    offsetY = 0;
+    currentScale = 1.0;
+    setTransform(img);
+  }
 </script>
 
 </body>
